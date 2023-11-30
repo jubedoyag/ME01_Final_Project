@@ -78,7 +78,7 @@ class WumpusWorld:
                     self.limits[x][y] = 'Wall'
                     self.field[x][y] = 'X'
 
-    # Revisa si existen posiciones váñidas (que no son paredes) arriba, abajo, izquierda y a la derecha de la posición dada, respectivamente
+    # Revisa si existen posiciones válidas (que no son paredes) arriba, abajo, izquierda y a la derecha de la posición dada, respectivamente
     def adjacent(self, x, y):
 
         adjacents = list()

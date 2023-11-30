@@ -19,3 +19,21 @@ def random_pair(size):
     x = random.randrange(size)
     y = random.randrange(size)
     return x, y
+
+
+# Genera todas las posibles combinaciones de un arreglo de booleanos de tamano n
+def generate_combinations(n):
+    def generate_helper(current_combination, index):
+        if index >= n:
+            combinations.append(current_combination.copy())
+            return
+
+        current_combination[index] = True
+        generate_helper(current_combination, index + 1)
+
+        current_combination[index] = False
+        generate_helper(current_combination, index + 1)
+
+    combinations = []
+    generate_helper([False] * n, 0)
+    return combinations

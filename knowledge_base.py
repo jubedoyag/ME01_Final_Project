@@ -4,6 +4,7 @@ from environment import player_position
 from utilities import possible_actions
 from utilities import exclude_walls
 from utilities import random
+from utilities import generate_combinations
 
 
 class KnowledgeBase:
@@ -16,6 +17,7 @@ class KnowledgeBase:
         self.danger = list()
         self.unknown = list()
 
+        self.breeze = list()
         self.possible_pit = list()
         self.possible_wumpus = list()
         self.no_pits = list()
@@ -85,6 +87,7 @@ class KnowledgeBase:
                 if perception[1] == 'Bait' and adj not in self.safe and\
                         adj not in self.possible_pit and adj not in self.no_pits:
                     self.possible_pit.append(adj)
+                    self.breeze.append(position)
 
                 # El agente puede descartar posibles Wumpus y Pits en determinadas posiciones de acuerdo con las percepciones anteriores
                 if perception[0] == 'Nothing' and adj in self.possible_wumpus:
@@ -105,6 +108,125 @@ class KnowledgeBase:
         print('Vulnerable positions:       ' + str(self.safe))
 
         return 'Continue', self.max_iterations
+
+    def use_prob_inference(self, actions):
+
+        print("#### enter in prob_inference() ####")
+
+        # Lista de los cuadrados que son adjacentes a los cuadrados sin hoyos
+        frontier = list()
+
+        for known_square in self.no_pits:
+            adjacent = possible_actions(known_square)
+            for adj in adjacent:
+                if adj not in self.visited:
+                    frontier.append(adj)
+
+        # Filtramos los cuadrados en la frontera sin adjacentes con briza (para realizar la operacion de inferencia)
+        frontier_with_breezes = list()
+        for square in frontier:
+            adjacent = possible_actions(square)
+            adj_with_breeze = 0
+            for adj in adjacent:
+                if adj in self.breeze and adj in self.visited:
+                    adj_with_breeze += 1
+            if adj_with_breeze > 0:
+                frontier_with_breezes.append(square)
+
+        # Generamos la distribucion de probabilidad (send helpihna)
+        # filtramos las posiciones dentro de la frontera
+        actions_in_frontier = [action for action in actions if action in frontier]
+
+        # las posibles combinaciones de booleanos de un arreglo de tamano n
+        # representan los modelos posibles (combinaciones de las posiciones) de la frontera
+        combinations = generate_combinations(len(frontier)-1)
+
+        # las variables para guardar la posicion con menor prob. de tener un hoyo
+        less_prob_p_in_act = 1
+        best_action = actions[0]
+        # action es el cuadrado que se analizara (query)
+        for action in actions_in_frontier:
+
+            # Primero encontramos el valor de la distrib. de tener un hoyo en action (Pij = True)
+            p_in_action = 0
+            for combination in combinations:
+
+                filtered_squares = list()
+                for i in range(len(combination)):
+                    if combination[i]:
+                        filtered_squares.append(frontier[i])
+                # Como se presupone que hay un hoyo en la posicion actual, lo anadimos a la
+                # lista de cuadrados adjacentes a los conocidos y que decimos tienen hoyos.
+                filtered_squares.append(action)
+
+                # El modelo de la frontera debe ser consistente con la evidencia (known, Pij = True, frontier)
+                is_valid = True
+
+                for breeze_sqr in self.breeze:
+                    adjacent = possible_actions(breeze_sqr)
+
+                    has_adjacents = 0
+                    for adj in adjacent:
+                        # Esto significa que el cuadrado que tiene un hoyo es adjacente al que tiene brisa
+                        if adj in filtered_squares:
+                            has_adjacents += 1
+                    is_valid = is_valid and (has_adjacents > 0)
+
+                frontier_model_value = 1
+                if is_valid:
+                    for square_have_pit in combination:
+                        frontier_model_value *= 0.2 if square_have_pit else 0.8
+                else:
+                    frontier_model_value = 0
+
+                p_in_action += frontier_model_value
+
+            p_in_act_value = p_in_action * 0.2
+
+            # Luego encontramos el valor de la distrib. al NO tener un hoyo en action (Pij = False)
+            no_p_in_action = 0
+            for combination in combinations:
+
+                filtered_squares = list()
+                for i in range(len(combination)):
+                    if combination[i]:
+                        filtered_squares.append(frontier[i])
+                # En este caso no hay hoyo en la posicion actual, por lo que no se agrega
+
+                # El modelo de la frontera debe ser consistente con la evidencia (known, Pij = False, frontier)
+                is_valid = True
+
+                for breeze_sqr in self.breeze:
+                    adjacent = possible_actions(breeze_sqr)
+
+                    has_adjacents = 0
+                    for adj in adjacent:
+                        # Esto significa que el cuadrado que tiene un hoyo es adjacente al que tiene brisa
+                        if adj in filtered_squares:
+                            has_adjacents += 1
+                    is_valid = is_valid and (has_adjacents > 0)
+
+                frontier_model_value = 1
+                if is_valid:
+                    for square_have_pit in combination:
+                        frontier_model_value *= 0.2 if square_have_pit else 0.8
+                else:
+                    frontier_model_value = 0
+
+                no_p_in_action += frontier_model_value
+
+            no_p_in_act_value = no_p_in_action * 0.8
+
+            # Encontramos la normalizacion de los valores p y ¬p para la distribucion, esto
+            # es, encontrar las probabilidades de ambos casos: posicion con y sin hoyo
+            alpha = p_in_act_value + no_p_in_act_value
+            p_prob = p_in_act_value / alpha
+
+            # Si la probabilidad de que esta posicion (action) tenga un hoyo, se deja como la mejor opcion
+            if p_prob < less_prob_p_in_act:
+                best_action = action
+
+        return best_action
 
     def ask_knowledge_base(self, previous_position, actions):
 
@@ -139,7 +261,14 @@ class KnowledgeBase:
         if prior_1:
             if previous_position in prior_1 and len(prior_1) > 1:
                 prior_1.remove(previous_position)
+
+            if previous_position in prior_1 and len(prior_1) == 1:
+                # En caso de no contar con posiciones seguras, se movera a la que posea menor probabilidad de hoyo
+                next_action = self.use_prob_inference(actions)
+                return next_action
+
             return random.choice(prior_1)
+
 
     def shoot_arrow(self):
 
