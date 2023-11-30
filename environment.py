@@ -78,7 +78,7 @@ class WumpusWorld:
                     self.limits[x][y] = 'Wall'
                     self.field[x][y] = 'X'
 
-    # Revisa si existen posiciones váñidas (que no son paredes) arriba, abajo, izquierda y a la derecha de la posición dada, respectivamente
+    # Revisa si existen posiciones válidas (que no son paredes) arriba, abajo, izquierda y a la derecha de la posición dada, respectivamente
     def adjacent(self, x, y):
 
         adjacents = list()
@@ -135,7 +135,7 @@ class WumpusWorld:
             for i in range(size - 1):
                 for j in range(size - 1):
                     self.perceptions[i][j][4] = 'Scream'
-                    # Si el Wumpus es muerto, su hedor deja de existis en el ambiente
+                    # Si el Wumpus es muerto, su hedor deja de existir en el ambiente
                     if self.perceptions[i][j][0] == 'Stench':
                         self.perceptions[i][j][0] = 'Nothing'
 

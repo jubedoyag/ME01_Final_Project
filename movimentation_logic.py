@@ -76,7 +76,7 @@ class Exploration:
                 self.total_actions += 3     # Gira 180° y mueve hacia adelante
                 print('\nThe agent found a WALL and got into position ' + str(self.position))
 
-            # Si se encuentra el otro
+            # Si se encuentra el oro
             elif status == 'Gold':
                 self.total_actions += 1     # Agarrar el oro
                 self.points += got_gold
