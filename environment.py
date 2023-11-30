@@ -35,26 +35,26 @@ class WumpusWorld:
     # El agente siempre es colocado en la misma posición (Esquina inferior izquierda del mundo)
     def place_agent(self):
 
-        self.field[size - 2][1] = 'A'
+        self.field[size - 2][1] = 'R'
 
     # Posiciona el oro en el mundo de forma aleatoria
     def place_gold(self):
         while True:
             x, y = random_pair(size)
             if self.field[x][y] == '-' and self.limits[x][y] != 'Wall':
-                self.field[x][y] = 'O'
+                self.field[x][y] = 'D'
                 break
 
     # Posiciona el Wumpus en el mundo de forma aleatoria
     def place_wumpus(self):
         while True:
             x, y = random_pair(size)
-            if (self.field[x][y] == '-' or self.field[x][y] == 'O') and self.limits[x][y] != 'Wall' \
+            if (self.field[x][y] == '-' or self.field[x][y] == 'D') and self.limits[x][y] != 'Wall' \
                     and [x, y] != adj1 and [x, y] != adj2:
                 if self.field[x][y] == '-':
-                    self.field[x][y] = 'W'
+                    self.field[x][y] = 'I'
                 else:
-                    self.field[x][y] = 'O&W'  # oro y Wumpus en la misma posicion
+                    self.field[x][y] = 'D&I'  # oro y Wumpus en la misma posicion
                 break
 
     # Posiciona los Pits en el mundo de forma aleatoria, con probabilidad del 20% para el total de posiciones
@@ -66,7 +66,7 @@ class WumpusWorld:
             x, y = random_pair(size)
 
             if self.field[x][y] == '-' and [x, y] != adj1 and [x, y] != adj2 and self.limits[x][y] != 'Wall':
-                self.field[x][y] = 'P'
+                self.field[x][y] = 'H'
                 i += 1
 
     # Delimitación de los limites
@@ -116,14 +116,14 @@ class WumpusWorld:
                 if self.limits[x][y] == 'Wall':
                     perception[3] = 'Bump'
                 else:
-                    if 'W' in neighbors:
-                        perception[0] = 'Stench'
-                    if 'O&W' in neighbors:
-                        perception[0] = 'Stench'
-                    if 'P' in neighbors:
-                        perception[1] = 'Breeze'
-                    if self.field[x][y] == 'O' or self.field[x][y] == 'O&W':
-                        perception[2] = 'Glitter'
+                    if 'I' in neighbors:
+                        perception[0] = 'Noise'
+                    if 'D&I' in neighbors:
+                        perception[0] = 'Noise'
+                    if 'H' in neighbors:
+                        perception[1] = 'Bait'
+                    if self.field[x][y] == 'D' or self.field[x][y] == 'D&I':
+                        perception[2] = 'Repudiation'
                 perception_line.append(perception)
             field.append(perception_line)
         self.perceptions = field
@@ -131,12 +131,12 @@ class WumpusWorld:
     def kill_wumpus(self, position):
         x, y = position[0], position[1]
         # Si el agente dispara la flecha en la posición donde está el Wumpus, su grito se envia a todas las percepciones del ambiente
-        if self.field[x][y] == 'W' or self.field[x][y] == 'O&W':
+        if self.field[x][y] == 'I' or self.field[x][y] == 'D&I':
             for i in range(size - 1):
                 for j in range(size - 1):
-                    self.perceptions[i][j][4] = 'Scream'
+                    self.perceptions[i][j][4] = 'Blackout'
                     # Si el Wumpus es muerto, su hedor deja de existis en el ambiente
-                    if self.perceptions[i][j][0] == 'Stench':
+                    if self.perceptions[i][j][0] == 'Noise':
                         self.perceptions[i][j][0] = 'Nothing'
 
             return True

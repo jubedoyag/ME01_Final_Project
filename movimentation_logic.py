@@ -55,7 +55,7 @@ class Exploration:
             self.check_alive(self.position)
             if not self.alive:
                 self.points += got_killed
-                print('\nThe agent has been killed by the wumpus!')
+                print('\nThe Malware has been detected and deleted!')
                 break
 
             # Actualiza la puntuación, dirección anterior y actual del agente
@@ -74,10 +74,10 @@ class Exploration:
                 self.pointing = self.rotate_180(self.previous_pointing)
                 self.position = self.previous_position
                 self.total_actions += 3     # Gira 180° y mueve hacia adelante
-                print('\nThe agent found a WALL and got into position ' + str(self.position))
+                print('\nThe Malware found an undesired LAN and got into position ' + str(self.position))
 
             # Si se encuentra el otro
-            elif status == 'Gold':
+            elif status == 'Data':
                 self.total_actions += 1     # Agarrar el oro
                 self.points += got_gold
                 self.gold = True
@@ -103,11 +103,11 @@ class Exploration:
         perception = self.world.get_perception(position)
 
         # Menciona si el agente fue muerto conforme la posición dada
-        if self.world.field[x][y] == 'P':
+        if self.world.field[x][y] == 'H':
             self.alive = False
-        elif self.world.field[x][y] == 'W' and perception[4] != 'Scream':
+        elif self.world.field[x][y] == 'I' and perception[4] != 'Blackout':
             self.alive = False
-        elif self.world.field[x][y] == 'O&W' and perception[4] != 'Scream':
+        elif self.world.field[x][y] == 'D&I' and perception[4] != 'Blackout':
             self.alive = False
 
     @staticmethod

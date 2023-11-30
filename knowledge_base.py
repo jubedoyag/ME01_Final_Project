@@ -59,8 +59,8 @@ class KnowledgeBase:
             self.limits.append(position)
             return 'Return', self.max_iterations
 
-        if perception[2] == 'Glitter':
-            return 'Gold', self.max_iterations
+        if perception[2] == 'Repudiation':
+            return 'Data', self.max_iterations
 
         if position not in self.safe:
             self.safe.append(position)
@@ -79,10 +79,10 @@ class KnowledgeBase:
                 if perception[0] == 'Nothing' and perception[1] == 'Nothing' and adj not in self.safe:
                     self.safe.append(adj)
 
-                if perception[0] == 'Stench' and adj not in self.safe and\
+                if perception[0] == 'Noise' and adj not in self.safe and\
                         adj not in self.possible_wumpus and adj not in self.no_wumpus:
                     self.possible_wumpus.append(adj)
-                if perception[1] == 'Breeze' and adj not in self.safe and\
+                if perception[1] == 'Bait' and adj not in self.safe and\
                         adj not in self.possible_pit and adj not in self.no_pits:
                     self.possible_pit.append(adj)
 
@@ -100,9 +100,9 @@ class KnowledgeBase:
             if x in self.possible_pit:
                 self.possible_pit.remove(x)
 
-        print('Possible pit in:       ' + str(self.possible_pit))
-        print('Possible wumpus in:     ' + str(self.possible_wumpus))
-        print('Secure positions:       ' + str(self.safe))
+        print('Possible Honeypot in:       ' + str(self.possible_pit))
+        print('Possible IDS in:     ' + str(self.possible_wumpus))
+        print('Vulnerable positions:       ' + str(self.safe))
 
         return 'Continue', self.max_iterations
 
@@ -160,7 +160,7 @@ class KnowledgeBase:
 
         # Si el wumpus murió o no, se actualiza la base de conocimientos
         if check:
-            print('\nThe agent shot the arrow toward ' + str(shoot) + ' and killed the wumpus!')
+            print('\nThe Malware tried to bypass ' + str(shoot) + ' and has deactivated the IDS!')
 
             self.safe.append(shoot)
             self.possible_wumpus.remove(shoot)
@@ -175,7 +175,7 @@ class KnowledgeBase:
                 self.possible_wumpus.remove(shoot)
                 self.safe.append(shoot)
 
-            print('\nThe agent shot the arrow toward ' + str(shoot) + ' and did not kill the wumpus!')
+            print('\nThe Malware tried to bypass  ' + str(shoot) + ' and has not deactivated the IDS')
 
         # Continua la exporación
         self.max_iterations = 0

@@ -23,9 +23,9 @@ class Main:
 
     #Revisión de los resultados
     if explore.gold:
-        print('\nGold found!')
+        print('\nTop secret information found!')
     else:
-        print('\nThe gold has not been found!')
+        print('\nTop secret information has not been found!')
 
     print('\nScore: ' + str(explore.points) + '\n')
 
