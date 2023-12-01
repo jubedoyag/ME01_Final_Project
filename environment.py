@@ -118,8 +118,8 @@ class WumpusWorld:
                 else:
                     if 'I' in neighbors:
                         perception[0] = 'Noise'
-                    if 'D&I' in neighbors:
-                        perception[0] = 'Noise'
+                    #if 'D&I' in neighbors:
+                    #    perception[0] = 'Noise'
                     if 'H' in neighbors:
                         perception[1] = 'Bait'
                     if self.field[x][y] == 'D' or self.field[x][y] == 'D&I':
