@@ -1,7 +1,6 @@
 from movimentation_logic import Exploration
 from knowledge_base import KnowledgeBase
-from environment import WumpusWorld
-from environment import size
+from environment import *
 
 
 class Main:
@@ -10,22 +9,17 @@ class Main:
     world = WumpusWorld()
 
     #Mostrar mundo creado
-    for i in range(size):
+    '''for i in range(size):
         print(world.field[i])
     print('\n')
     for i in range(size):
-        print(world.perceptions[i])
+        print(world.perceptions[i])'''
+    world.show_world()
 
     #Establecer KB, exploración y movimiento del agente
     base = KnowledgeBase(world)
     explore = Exploration(world, base)
     explore.move_agent()
-
-    #Revisión de los resultados
-    if explore.gold:
-        print('\nGold found!')
-    else:
-        print('\nThe gold has not been found!')
 
     print('\nScore: ' + str(explore.points) + '\n')
 

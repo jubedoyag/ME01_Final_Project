@@ -1,6 +1,8 @@
 from knowledge_base import KnowledgeBase
-from environment import WumpusWorld
+from environment import *
 from utilities import possible_actions
+import heapq
+from queue import PriorityQueue
 
 # Medidas de desempeño propias del wumpus world
 got_gold = 1000
@@ -19,6 +21,7 @@ class Exploration:
         self.world = world
         self.base = base
         self.position = world.agent
+        self.start_position = world.agent
         self.pointing = 'Right'
         self.time = 0
         self.points = 0
@@ -32,6 +35,37 @@ class Exploration:
         self.pits_fallen = 0
         self.arrows_used = 0
         self.total_actions = 0
+
+    def cost(self, from_node, to_node):
+        return 1  # The cost is 1 for all movements
+
+    def heuristic(self, goal, next):
+        (x1, y1) = goal
+        (x2, y2) = next
+        return abs(x1 - x2) + abs(y1 - y2)
+
+    def a_star_search(self, start, goal):
+        frontier = PriorityQueue()
+        frontier.put(start, 0)
+        came_from = {tuple(start): None}
+        cost_so_far = {tuple(start): 0}
+
+        while not frontier.empty():
+            current = frontier.get()
+
+            if current == goal:
+                break
+
+            for next in possible_actions(current):
+                if next in self.base.visited: # Only consider visited nodes
+                    new_cost = cost_so_far[tuple(current)] + self.cost(current, next)
+                    if tuple(next) not in cost_so_far or new_cost < cost_so_far[tuple(next)]:
+                        cost_so_far[tuple(next)] = new_cost
+                        priority = new_cost + self.heuristic(goal, next)
+                        frontier.put(next, priority)
+                        came_from[tuple(next)] = current
+
+        return came_from, cost_so_far
 
     def move_agent(self):
 
@@ -55,7 +89,7 @@ class Exploration:
             self.check_alive(self.position)
             if not self.alive:
                 self.points += got_killed
-                print('\nThe agent has been killed by the wumpus!')
+                print('\nThe agent has died!')
                 break
 
             # Actualiza la puntuación, dirección anterior y actual del agente
@@ -81,7 +115,36 @@ class Exploration:
                 self.total_actions += 1     # Agarrar el oro
                 self.points += got_gold
                 self.gold = True
-                break
+
+                # Plan the route back to the start position if the agent has found the gold
+                if self.gold:
+                    print("--------------------------------------------------------------------------")
+                    print("\nThinking about the best path to reach the exit!")
+                    came_from, cost_so_far = self.a_star_search(self.position, self.start_position)
+                    # Now you can use `came_from` to backtrack from the start position to the current position
+                    path = []
+                    current = self.start_position
+                    while current != self.position:
+                        path.append(current)
+                        current = came_from[tuple(current)]
+                    path.reverse()  # Reverse the path so it goes from the current position to the start position
+
+                    print("Starting to run towards the exit!")
+                    print(f"Path: {self.position} -> {path}")
+                    #print(f"Recuerda que debes sumar +1 a cada coordenada para comparar en el mapa generado más arriba.")
+
+                    # Follow the path to the start position
+                    for next_position in path:
+                        actions, pointing = self.calculate_action(self.position, self.pointing, next_position)
+                        self.total_actions += actions
+                        self.pointing = pointing
+                        self.position = next_position
+
+                    # Check if the agent has reached the start position
+                    if self.gold and self.position == self.start_position:
+                        print(self.world.show_world())
+                        print("\nThe agent has returned to the start position with the gold and won the game!")
+                        break
 
             # Si el agente no logra proseguir, este intentará disparar la flecha al wumpus
             if count == max_iter - 1 and self.arrow:
@@ -107,8 +170,8 @@ class Exploration:
             self.alive = False
         elif self.world.field[x][y] == 'W' and perception[4] != 'Scream':
             self.alive = False
-        elif self.world.field[x][y] == 'O&W' and perception[4] != 'Scream':
-            self.alive = False
+        #elif self.world.field[x][y] == 'O&W' and perception[4] != 'Scream':
+        #    self.alive = False
 
     @staticmethod
     def rotate_180(previous_pointing):

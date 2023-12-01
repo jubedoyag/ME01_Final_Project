@@ -49,8 +49,8 @@ class WumpusWorld:
     def place_wumpus(self):
         while True:
             x, y = random_pair(size)
-            if (self.field[x][y] == '-' or self.field[x][y] == 'O') and self.limits[x][y] != 'Wall' \
-                    and [x, y] != adj1 and [x, y] != adj2:
+            if self.field[x][y] == '-' and self.limits[x][y] != 'Wall' and [x, y] != adj1 \
+                    and [x, y] != adj2:
                 if self.field[x][y] == '-':
                     self.field[x][y] = 'W'
                 else:
@@ -118,8 +118,8 @@ class WumpusWorld:
                 else:
                     if 'W' in neighbors:
                         perception[0] = 'Stench'
-                    if 'O&W' in neighbors:
-                        perception[0] = 'Stench'
+                    #if 'O&W' in neighbors:
+                    #    perception[0] = 'Stench'
                     if 'P' in neighbors:
                         perception[1] = 'Breeze'
                     if self.field[x][y] == 'O' or self.field[x][y] == 'O&W':
@@ -147,3 +147,9 @@ class WumpusWorld:
         x = position[0]
         y = position[1]
         return self.perceptions[x][y]
+
+    #---------------------- Utilities ----------------------
+    def show_world(self):
+        print("\n")
+        for i in range(size):
+            print(" ".join(self.field[i]))
