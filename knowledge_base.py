@@ -1,6 +1,7 @@
 from environment import WumpusWorld
 from environment import size
 from environment import player_position
+from environment import prob
 from utilities import possible_actions
 from utilities import exclude_walls
 from utilities import random
@@ -188,13 +189,13 @@ class KnowledgeBase:
                 frontier_model_value = 1
                 if is_valid:
                     for square_have_pit in combination:
-                        frontier_model_value *= 0.2 if square_have_pit else 0.8
+                        frontier_model_value *= prob if square_have_pit else (1 - prob)
                 else:
                     frontier_model_value = 0
 
                 p_in_action += frontier_model_value
 
-            p_in_act_value = p_in_action * 0.2
+            p_in_act_value = p_in_action * prob
 
             # Luego encontramos el valor de la distrib. al NO tener un hoyo en action (Pij = False)
             no_p_in_action = 0
@@ -222,13 +223,13 @@ class KnowledgeBase:
                 frontier_model_value = 1
                 if is_valid:
                     for square_have_pit in combination:
-                        frontier_model_value *= 0.2 if square_have_pit else 0.8
+                        frontier_model_value *= prob if square_have_pit else (1 - prob)
                 else:
                     frontier_model_value = 0
 
                 no_p_in_action += frontier_model_value
 
-            no_p_in_act_value = no_p_in_action * 0.8
+            no_p_in_act_value = no_p_in_action * (1 - prob)
 
             # Encontramos la normalizacion de los valores p y ¬p para la distribucion, esto
             # es, encontrar las probabilidades de ambos casos: posicion con y sin hoyo

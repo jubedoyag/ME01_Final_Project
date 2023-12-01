@@ -1,7 +1,6 @@
 from knowledge_base import KnowledgeBase
 from environment import *
 from utilities import possible_actions
-import heapq
 from queue import PriorityQueue
 
 # Medidas de desempeño propias del wumpus world

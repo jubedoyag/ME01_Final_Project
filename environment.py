@@ -3,7 +3,7 @@ from utilities import random_pair
 
 # Dimensipon de la matriz
 # 6 -> matriz 4x4, las filas y columnas 0 y 5, corresponden apenas a las paredes del mundo como limites
-size = 6
+size = 4 + 2
 
 # Probabilidad de una posicion cualquiera del mundo (excepto la inicial) de ser un Pit
 prob = 0.2
@@ -53,8 +53,8 @@ class WumpusWorld:
                     and [x, y] != adj2:
                 if self.field[x][y] == '-':
                     self.field[x][y] = 'W'
-                else:
-                    self.field[x][y] = 'O&W'  # oro y Wumpus en la misma posicion
+                #else:
+                #    self.field[x][y] = 'O&W'  # oro y Wumpus en la misma posicion
                 break
 
     # Posiciona los Pits en el mundo de forma aleatoria, con probabilidad del 20% para el total de posiciones
