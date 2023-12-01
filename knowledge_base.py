@@ -33,7 +33,7 @@ class KnowledgeBase:
         # Obtiene todads las posiciones del mundo, excepto la que el agente empieza
         for x in range(size):
             for y in range(size):
-                if [x, y] != player_position:
+                if [x, y] != player_position and (x != 0 and x != size-1 and y != 0 and y != size-1):
                     positions.append([x, y])
 
         self.unknown = positions.copy()
@@ -66,6 +66,10 @@ class KnowledgeBase:
 
         if position not in self.safe:
             self.safe.append(position)
+            if position in self.possible_pit:
+                self.possible_pit.remove(position)
+            if position in self.possible_wumpus:
+                self.possible_wumpus.remove(position)
 
         # Obtiene todos los adyacentes de la posición actual, excluyendo la anterior
         adjacent = possible_actions(position)
@@ -80,6 +84,8 @@ class KnowledgeBase:
                 # Si no hay brisa o hedor, las posciones adyacentes son seguras
                 if perception[0] == 'Nothing' and perception[1] == 'Nothing' and adj not in self.safe:
                     self.safe.append(adj)
+                    self.no_wumpus.append(adj)
+                    self.no_pits.append(adj)
 
                 if perception[0] == 'Noise' and adj not in self.safe and\
                         adj not in self.possible_wumpus and adj not in self.no_wumpus:
@@ -111,11 +117,12 @@ class KnowledgeBase:
 
     def use_prob_inference(self, actions):
 
-        print("#### enter in prob_inference() ####")
+        print("-- Moving with probabilistic inference")
 
         # Lista de los cuadrados que son adjacentes a los cuadrados sin hoyos
         frontier = list()
 
+        print("- No pit squares:", self.no_pits)
         for known_square in self.no_pits:
             adjacent = possible_actions(known_square)
             for adj in adjacent:
@@ -135,7 +142,11 @@ class KnowledgeBase:
 
         # Generamos la distribucion de probabilidad (send helpihna)
         # filtramos las posiciones dentro de la frontera
-        actions_in_frontier = [action for action in actions if action in frontier]
+        # actions_in_frontier = [action for action in actions if action in frontier]
+        actions_in_frontier = []
+        for action in actions:
+            if action in frontier:
+                actions_in_frontier.append(action)
 
         # las posibles combinaciones de booleanos de un arreglo de tamano n
         # representan los modelos posibles (combinaciones de las posiciones) de la frontera
@@ -145,6 +156,8 @@ class KnowledgeBase:
         less_prob_p_in_act = 1
         best_action = actions[0]
         # action es el cuadrado que se analizara (query)
+        print("- Frontier squares:", frontier)
+        print("- Action squares:", actions_in_frontier)
         for action in actions_in_frontier:
 
             # Primero encontramos el valor de la distrib. de tener un hoyo en action (Pij = True)
@@ -222,10 +235,15 @@ class KnowledgeBase:
             alpha = p_in_act_value + no_p_in_act_value
             p_prob = p_in_act_value / alpha
 
-            # Si la probabilidad de que esta posicion (action) tenga un hoyo, se deja como la mejor opcion
+            # Si la probabilidad de que esta posicion (action) tenga un hoyo es menor,
+            # se deja como la mejor opcion
+            print("- Action:", action, " - Pit Prob.:", str(p_prob)[:6])
             if p_prob < less_prob_p_in_act:
+                print("- Chosen action:", action)
+                less_prob_p_in_act = p_prob
                 best_action = action
 
+        print("-- Moving to:", best_action)
         return best_action
 
     def ask_knowledge_base(self, previous_position, actions):
