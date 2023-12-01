@@ -122,7 +122,7 @@ class KnowledgeBase:
         # Lista de los cuadrados que son adjacentes a los cuadrados sin hoyos
         frontier = list()
 
-        print("- No pit squares:", self.no_pits)
+        print("- No honeypot squares:", self.no_pits)
         for known_square in self.no_pits:
             adjacent = possible_actions(known_square)
             for adj in adjacent:
@@ -237,7 +237,7 @@ class KnowledgeBase:
 
             # Si la probabilidad de que esta posicion (action) tenga un hoyo es menor,
             # se deja como la mejor opcion
-            print("- Action:", action, " - Pit Prob.:", str(p_prob)[:6])
+            print("- Action:", action, " - Honeypot Prob.:", str(p_prob)[:6])
             if p_prob < less_prob_p_in_act:
                 print("- Chosen action:", action)
                 less_prob_p_in_act = p_prob

@@ -119,7 +119,7 @@ class Exploration:
                 # Plan the route back to the start position if the agent has found the gold
                 if self.gold:
                     print("--------------------------------------------------------------------------")
-                    print("\nThinking about the best path to reach the exit!")
+                    print("\nThinking about the best path to reach the entry point!")
                     came_from, cost_so_far = self.a_star_search(self.position, self.start_position)
                     # Now you can use `came_from` to backtrack from the start position to the current position
                     path = []
@@ -129,7 +129,7 @@ class Exploration:
                         current = came_from[tuple(current)]
                     path.reverse()  # Reverse the path so it goes from the current position to the start position
 
-                    print("Starting to run towards the exit!")
+                    print("Starting to run towards the entry point!")
                     print(f"Path: {self.position} -> {path}")
                     #print(f"Recuerda que debes sumar +1 a cada coordenada para comparar en el mapa generado más arriba.")
 
@@ -143,7 +143,7 @@ class Exploration:
                     # Check if the agent has reached the start position
                     if self.gold and self.position == self.start_position:
                         print(self.world.show_world())
-                        print("\nThe agent has returned to the start position with the gold and won the game!")
+                        print("\nThe Malware has returned to the entry point with the Top Secret Data!")
                         break
 
             # Si el agente no logra proseguir, este intentará disparar la flecha al wumpus
